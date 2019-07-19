@@ -36,7 +36,11 @@ cwd = os.getcwd()
 csv=pd.read_csv(args.file)
 flist=csv['Path']
 
-if args.read != True:  
+#if args.read == True:
+#    structures=np.load('structures.npy')
+
+#else:
+if args.read != True:
     file_list=[]
     i=0
     for file in flist:
@@ -61,6 +65,7 @@ if args.read != True:
             return structure
     
     structures = [ read_vasp_data(id) for id in file_list ]
+    np.save('structures.npy',arr=structures)
     ids = [ id for id in file_list ]
     data = {'structures': structures, 'ids' : ids }
     df = pd.DataFrame.from_dict(data)
@@ -94,8 +99,8 @@ if args.ofm==True:
     ofm.set_n_jobs(28)
     start = time.monotonic()
     print('Featurizing ofm...')
-    df  = ofm.featurize_dataframe(df, 'structures',ignore_errors=True)
-    df['orbital field matrix'] = pd.Series([s.flatten() for s in df['orbital field matrix']], df.index)
+    #df  = ofm.featurize_dataframe(df, 'structures',ignore_errors=True)
+    #df['orbital field matrix'] = pd.Series([s.flatten() for s in df['orbital field matrix']], df.index)
     i=0
     for structure in structures:
         print('structure %i of %i' %(i,len(structures)))
@@ -103,14 +108,14 @@ if args.ofm==True:
         i+=1
     finish = time.monotonic()
     
-    dfdumb=pd.DataFrame()
-    i=0
-    for item in df['orbital field matrix']: 
-        name = file_list[i]#"item %i" %i
-        print(name) 
-        dfdumb[name]=pd.Series(item) 
-        i+=1 
-    dfdumb.to_csv("ofm.csv",mode='w')
+    #dfdumb=pd.DataFrame()
+    #i=0
+    #for item in df['orbital field matrix']: 
+    #    name = file_list[i]#"item %i" %i
+    #    print(name) 
+    #    dfdumb[name]=pd.Series(item) 
+    #    i+=1 
+    #dfdumb.to_csv("ofm.csv",mode='w')
     
     np.save('ofm_out.npy',arr=ofm_out)
     print("TIME TO FEATURIZE OFM %f SECONDS" % (finish-start))
@@ -121,7 +126,7 @@ if args.redf==True:
     if args.read == True:
         redfs_X=np.load('redf_X.npy',allow_pickle=True)
     else:
-        redf = ElectronicRadialDistributionFunction()
+        redf = ElectronicRadialDistributionFunction(cutoff=2.0)
         redf.set_n_jobs(28)
         start = time.monotonic()
         print('Featurizing redf...')
@@ -151,9 +156,12 @@ if args.redf==True:
 tuned_parameters = [{'kernel':['rbf'],'coef0':[1,10,100],'gamma': [1e-6,1e-5,1e-4, 1e-3, 1e-2, 1e-1],'alpha': [1e-6,1e-5,1e-4,1e-3,1e-2,1e-1]}]
 scores = ['neg_mean_absolute_error']
 
-data_y=pd.read_csv(args.file)
-Y=data_y['total energy']#.as_matrix()
+if args.read != True:
+    data_y=pd.read_csv(args.file)
+    Y=data_y['total energy']#.as_matrix()
 
+if args.read == True:
+    Y = np.load('redf_Y.npy')
 
 if args.debug == True: 
     cleaned=[]
@@ -252,29 +260,32 @@ if args.redf==True:
     np.save('bad_structs.npy',arr=bad_redfs)
     print(bad_redfs)
 
-    i=0
-    j=0
-    x_clean=[]
-    y_clean=[]
-    for structure in structures:
-        print(i)
-        if i == bad_redfs[j]:
-            print('removed struct %i' %i)
-            if j != len(bad_redfs)-1:
-                j+=1 
-        else:
-            #x_clean.append(X[i])
-            y_clean.append(Y[i])
-        i+=1
+    if args.read != True:
+        i=0
+        j=0
+        x_clean=[]
+        y_clean=[]
+        for structure in structures:
+            print(i)
+            if i == bad_redfs[j]:
+                print('removed struct %i' %i)
+                if j != len(bad_redfs)-1:
+                    j+=1 
+            else:
+                #x_clean.append(X[i])
+                y_clean.append(Y[i])
+            i+=1
 
-    Y=np.array(y_clean) 
-    Y=Y.reshape(Y.shape[0],)
+        Y=np.array(y_clean) 
+        Y=Y.reshape(Y.shape[0],)
 
-    np.save('redf_X.npy',arr=X)
-    np.save('redf_Y.npy',arr=Y)
-    print(Y)
+        np.save('redf_X.npy',arr=X)
+        np.save('redf_Y.npy',arr=Y)
+        print(Y)
+
 
 if args.ml == True:
+    cv=5
     # make training and test set
     X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.1)
 
