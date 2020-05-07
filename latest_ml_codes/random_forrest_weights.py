@@ -194,6 +194,10 @@ name=name.split('.')[0]
 endpoint='deltaE'
 
 X=data[features]
+if args.step_weights is True: 
+    X['weights'] = data['weights']
+if args.exp_weights is True: 
+    X['weights'] = data['weights']
 Y=data[endpoint]
 print('X.columns') 
 print(X.columns) 
@@ -221,9 +225,9 @@ n_estimators=1000
 print('training...')
 forest = ExtraTreesRegressor(n_estimators=n_estimators,random_state=1,n_jobs=-1)
 if args.step_weights is True: 
-    forest.fit(X=X_train,y=y_train,sample_weight=data['weights'])
+    forest.fit(X=X_train[features],y=y_train,sample_weight=X_train['weights'])
 if args.exp_weights is True: 
-    forest.fit(X=X_train,y=y_train,sample_weight=data['weights'])
+    forest.fit(X=X_train[features],y=y_train,sample_weight=X_train['weights'])
 forest.fit(X=X_train,y=y_train)#,sample_weight=data['weights'])
 print('done!...')
 model_train=forest.predict(X_train)
