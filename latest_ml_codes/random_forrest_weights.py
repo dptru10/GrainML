@@ -194,10 +194,6 @@ name=name.split('.')[0]
 endpoint='deltaE'
 
 X=data[features]
-if args.step_weights is True: 
-    X['weights'] = data['weights']
-if args.exp_weights is True: 
-    X['weights'] = data['weights']
 Y=data[endpoint]
 print('X.columns') 
 print(X.columns) 
@@ -208,6 +204,10 @@ for item in features:
     combined[item]=X[item]
 combined['deltaE']=Y
 
+if args.step_weights is True: 
+    combined['weights'] = data['weights']
+if args.exp_weights is True: 
+    combined['weights'] = data['weights']
 combined=combined.replace([np.inf, -np.inf], np.nan)
 combined=combined.replace(['inf', '-inf'], np.nan)
 combined=combined.dropna()#fillna(0.0)
