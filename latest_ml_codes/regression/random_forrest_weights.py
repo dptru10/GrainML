@@ -18,6 +18,7 @@ import argparse
 
 parser= argparse.ArgumentParser()
 parser.add_argument("file1", help="file to be read in", type=str)
+parser.add_argument("--important_features",action="store_true")
 parser.add_argument("--insert",action="store_true")
 parser.add_argument("--remove",action="store_true")
 parser.add_argument("--negative",action="store_true")
@@ -58,6 +59,17 @@ if args.remove is True:
                'nn_vv_std','nn_dist_std','nn_eng_std','nn_cnp_std','nn_si_bonds_std',
                'nn_vv_min','nn_dist_min','nn_eng_min','nn_cnp_min','nn_si_bonds_min',
                'nn_vv_max','nn_dist_max','nn_eng_max','nn_cnp_max','nn_si_bonds_max']
+
+if args.important_features is True: 
+    if args.insert is True: 
+        features=['op_voronoi_vol','nn_si_bonds_average','nn_vv_average','nn_dist_average','nn_eng_average','nn_cnp_average',
+                  'nn_vv_std','nn_eng_std','nn_cnp_std','nn_si_bonds_std','nn_vv_min','nn_dist_min','nn_eng_min','nn_cnp_min',
+                  'nn_si_bonds_min','nn_vv_max','nn_dist_max','nn_eng_max','nn_cnp_max']
+    if args.remove is True: 
+        features=['op_voronoi_vol','op_eng','op_cnp','nn_si_bonds_average','nn_vv_average','nn_dist_average','nn_eng_average','nn_cnp_average',
+                   'nn_vv_std','nn_dist_std','nn_eng_std','nn_cnp_std','nn_si_bonds_std','nn_vv_min','nn_dist_min','nn_eng_min','nn_cnp_min',
+                   'nn_si_bonds_min','nn_vv_max','nn_dist_max','nn_eng_max','nn_cnp_max']
+
 
 if args.featurized is True: 
     features=list(data.columns)
@@ -204,30 +216,38 @@ for item in features:
     combined[item]=X[item]
 combined['deltaE']=Y
 
-if args.step_weights is True: 
-    combined['weights'] = data['weights']
-if args.exp_weights is True: 
-    combined['weights'] = data['weights']
+#if args.step_weights is True: 
+#    combined['weights'] = data['weights']
+#if args.exp_weights is True: 
+#    combined['weights'] = data['weights']
 combined=combined.replace([np.inf, -np.inf], np.nan)
 combined=combined.replace(['inf', '-inf'], np.nan)
 combined=combined.dropna()#fillna(0.0)
 combined.to_csv('sampled_data.csv')
 Y=combined['deltaE']
 X=combined.drop(labels='deltaE',axis=1)
-
+X.to_csv('X_check.csv')
 #X=StandardScaler().fit_transform(X)
 # make training and test set
 X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.1,random_state=1)
+
+train_weights=[]
+for idx in y_train.index: 
+    train_weights.append(weights[idx])
 
 print('training set size: %s' %len(X_train))
 
 n_estimators=1000
 print('training...')
 forest = ExtraTreesRegressor(n_estimators=n_estimators,random_state=1,n_jobs=-1)
-if args.step_weights is True: 
-    forest.fit(X=X_train[features],y=y_train,sample_weight=X_train['weights'])
+if args.step_weights is True:
+    #X_train = X_train.drop(labels='weights')
+    #X_test  = X_test.drop(labels='weights')
+    forest.fit(X=X_train,y=y_train,sample_weight=train_weights)
 if args.exp_weights is True: 
-    forest.fit(X=X_train[features],y=y_train,sample_weight=X_train['weights'])
+    #X_train = X_train.drop(labels='weights')
+    #X_test  = X_test.drop(labels='weights')
+    forest.fit(X=X_train,y=y_train,sample_weight=train_weights)
 forest.fit(X=X_train,y=y_train)#,sample_weight=data['weights'])
 print('done!...')
 model_train=forest.predict(X_train)
@@ -242,7 +262,7 @@ mae_score_test=mean_absolute_error(y_test,model_test)
 rmse_score_test=np.sqrt(mse_score_test)
 
 print('writing pickle file...')
-dump(forest,'%s.pkl' %name)
+dump(forest,'%s.pkl' %name, compress='zlib')
 importances = forest.feature_importances_
 std = np.std([tree.feature_importances_ for tree in forest.estimators_],
              axis=0)
