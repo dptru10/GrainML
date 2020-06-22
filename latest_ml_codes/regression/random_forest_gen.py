@@ -27,7 +27,18 @@ parser.add_argument("--random_n",action="store_true")
 args  = parser.parse_args() 
 
 print(args.file1)
-data=pd.read_pickle(args.file1)
+name=args.file1
+name=name.split('/')
+name=name[len(name)-1]
+name=name.split('.')[0]
+
+extension = name.split('.')[1]
+
+if extension == 'pkl':
+	data=pd.read_pickle(args.file1)
+
+if extension == 'csv':
+	data=pd.read_csv(args.file1)
 
 if args.outliers:
 	data=data.loc[data['anomaly']==1]
@@ -57,10 +68,6 @@ if args.remove is True:
               'nn_vv_min','nn_dist_min','nn_eng_min','nn_cnp_min','nn_si_bonds_min',
               'nn_vv_max','nn_dist_max','nn_eng_max','nn_cnp_max','nn_si_bonds_max']
 
-name=args.file1
-name=name.split('/')
-name=name[len(name)-1]
-name=name.split('.')[0]
 
 endpoint='deltaE'
 
