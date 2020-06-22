@@ -6,7 +6,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np  
 from matplotlib import colors
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
 from sklearn.ensemble import ExtraTreesRegressor
 #from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score 
@@ -27,7 +27,7 @@ parser.add_argument("--random_n",action="store_true")
 args  = parser.parse_args() 
 
 print(args.file1)
-data=pd.read_csv(args.file1)
+data=pd.read_pickle(args.file1)
 
 if args.outliers:
 	data=data.loc[data['anomaly']==1]
@@ -57,48 +57,6 @@ if args.remove is True:
               'nn_vv_min','nn_dist_min','nn_eng_min','nn_cnp_min','nn_si_bonds_min',
               'nn_vv_max','nn_dist_max','nn_eng_max','nn_cnp_max','nn_si_bonds_max']
 
-#data['nn_vv_average']=data['nn_1_voronoi_vol'] + data['nn_2_voronoi_vol'] + data['nn_3_voronoi_vol'] + data['nn_4_voronoi_vol'] 
-#data['nn_vv_average']=data['nn_vv_average'].divide(4)#len(data['nn_vv_average']))
-#data['nn_dist_average']=data['nn_1_distance'] + data['nn_2_distance'] + data['nn_3_distance'] + data['nn_4_distance']
-#data['nn_dist_average']=data['nn_dist_average'].divide(4)#len(data['nn_dist_average']))
-#data['nn_eng_average']=data['nn_1_eng'] + data['nn_2_eng'] + data['nn_3_eng'] + data['nn_4_eng']
-#data['nn_eng_average']=data['nn_eng_average'].divide(4)#len(data['nn_eng_average']))
-#data['nn_cnp_average']=data['nn_1_cnp'] + data['nn_2_cnp'] + data['nn_3_cnp'] + data['nn_4_cnp']
-#data['nn_cnp_average']=data['nn_cnp_average'].divide(4)#len(data['nn_cnp_average']))
-#data['nn_si_bonds_average']=data['nn_1_si-si_bonds'] + data['nn_2_si-si_bonds'] + data['nn_3_si-si_bonds'] + data['nn_4_si-si_bonds']
-#data['nn_si_bonds_average']=data['nn_si_bonds_average'].divide(4)#len(data['nn_cnp_average']))
-
-
-low_bias=data.loc[data['deltaE']<0.0]
-#low_bias=low_bias.loc[low_bias['deltaE']>-0.1]
-
-#if args.insert is True: 
-#    high=data.loc[data['deltaE']>0.1]
-#    low=data.loc[data['deltaE']<-0.1]
-#if args.remove is True: 
-#    high=data.loc[data['deltaE']>0.1]
-#    low=data.loc[data['deltaE']<-0.1]
-##
-##
-#length=len(high)+len(low)
-#print('total dataset size')
-#print(length)
-
-#low_bias=data.loc[data['deltaE']<0.1]
-#low_bias=low_bias.loc[low_bias['deltaE']>-0.1]
-
-#print('low bias, (0.1 < 0.0 < -0.1) size')
-#print(len(low_bias))
-#if len(low_bias) > int(1e5): 
-#    low_bias=low_bias.sample(n=int(1e5),random_state=1)
-#
-#data=high
-#data=data.append(low)
-##data=data.sample(n=len(low_bias))
-data=data.append(low_bias)
-#print('final dataset size')
-#print(len(data))
-
 name=args.file1
 name=name.split('/')
 name=name[len(name)-1]
@@ -127,36 +85,52 @@ X=combined.drop(labels='deltaE',axis=1)
 
 # make training and test set
 X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.1,random_state=1)
-tuned_parameters = [{'n_estimators':[500,1000,2000,5000]}]
+
+# Number of trees in random forest
+n_estimators = [int(x) for x in np.linspace(start = 200, stop = 2000, num = 10)]
+# Number of features to consider at every split
+max_features = ['auto', 'sqrt']
+# Maximum number of levels in tree
+max_depth = [int(x) for x in np.linspace(10, 110, num = 11)]
+max_depth.append(None)
+# Minimum number of samples required to split a node
+min_samples_split = [2, 5, 10, 15]
+# Minimum number of samples required at each leaf node
+min_samples_leaf = [1, 2, 4, 8]
+# Method of selecting samples for training each tree
+bootstrap = [True,False]
+# Create the random grid
+tuned_parameters = {'n_estimators': n_estimators,'max_features': max_features,'max_depth': max_depth,
+                'min_samples_split': min_samples_split,'min_samples_leaf': min_samples_leaf,'bootstrap': bootstrap}
 scores = ['neg_mean_absolute_error']
 
-forest = ExtraTreesRegressor(n_estimators=1000,random_state=1)
-forest.fit(X,Y)
-importances = forest.feature_importances_
-std = np.std([tree.feature_importances_ for tree in forest.estimators_],
-             axis=0)
-indices = np.argsort(importances)[::-1]
-
-
-print("Feature ranking:")
-
-ranked_features=[]
-for f in range(X.shape[1]):
-    ranked_features.append(features[indices[f]])
-    print("%d. %s (%f)" % (f + 1, features[indices[f]], importances[indices[f]]))
-
-plt.figure()
-plt.title("Feature importances")
-plt.bar(range(X.shape[1]), importances[indices],
-       color="r", yerr=std[indices], align="center")
-plt.xticks(range(X.shape[1]),ranked_features,rotation=45,fontsize=10,fontweight='bold')
-plt.xlim([-1, X.shape[1]])
-plt.tight_layout()
-plt.savefig('random_forest_feature_importance.png')
+#forest = ExtraTreesRegressor(n_estimators=1000,random_state=1)
+#forest.fit(X,Y)
+#importances = forest.feature_importances_
+#std = np.std([tree.feature_importances_ for tree in forest.estimators_],
+#             axis=0)
+#indices = np.argsort(importances)[::-1]
+#
+#
+#print("Feature ranking:")
+#
+#ranked_features=[]
+#for f in range(X.shape[1]):
+#    ranked_features.append(features[indices[f]])
+#    print("%d. %s (%f)" % (f + 1, features[indices[f]], importances[indices[f]]))
+#
+#plt.figure()
+#plt.title("Feature importances")
+#plt.bar(range(X.shape[1]), importances[indices],
+#       color="r", yerr=std[indices], align="center")
+#plt.xticks(range(X.shape[1]),ranked_features,rotation=45,fontsize=10,fontweight='bold')
+#plt.xlim([-1, X.shape[1]])
+#plt.tight_layout()
+#plt.savefig('random_forest_feature_importance.png')
 
 
 for score in scores:
-    forest = GridSearchCV(ExtraTreesRegressor(random_state=1),tuned_parameters,verbose=10,cv=5,n_jobs=-1,scoring='%s' %score)
+    forest = RandomizedSearchCV(ExtraTreesRegressor(random_state=1),tuned_parameters,verbose=10,cv=3,n_jobs=-1,scoring='%s' %score)
     
     forest.fit(X_train, y_train)
     model_train=forest.predict(X_train)
