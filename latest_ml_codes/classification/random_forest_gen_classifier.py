@@ -1,19 +1,20 @@
 #!/usr/bin/env python 
 from __future__ import print_function
 
+import argparse 
 import matplotlib 
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np  
-from matplotlib import colors
-from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
-from sklearn.ensemble import ExtraTreesClassifier
-#from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score 
-from sklearn.model_selection import train_test_split
-from joblib import dump, load
 import pandas as pd 
-import argparse 
+import seaborn as sns
+from matplotlib import colors
+from joblib import dump, load
+from collections import Counter
+from sklearn.ensemble import ExtraTreesClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, confusion_matrix, plot_confusion_matrix
+from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
 
 parser= argparse.ArgumentParser()
 parser.add_argument("file1", help="file to be read in", type=str)
@@ -30,15 +31,27 @@ print(args.file1)
 name=args.file1
 name=name.split('/')
 name=name[len(name)-1]
-name=name.split('.')[0]
-
 extension = name.split('.')[1]
+name=name.split('.')[0]
+print(name) 
+
 
 if extension == 'pkl':
 	data=pd.read_pickle(args.file1)
 
 if extension == 'csv':
 	data=pd.read_csv(args.file1)
+
+
+#neg=data.loc[data['deltaE']<0.0] 
+#pos=data.loc[data['deltaE']>0.0] 
+
+data['labels'] = 0
+
+data.loc[data['deltaE'] < 0.0, 'labels'] = -1
+data.loc[data['deltaE'] > 0.0, 'labels'] = 1
+
+print(Counter(data['labels']))
 
 if args.outliers:
 	data=data.loc[data['anomaly']==1]
@@ -69,7 +82,7 @@ if args.remove is True:
               'nn_vv_max','nn_dist_max','nn_eng_max','nn_cnp_max','nn_si_bonds_max']
 
 
-endpoint='deltaE'
+endpoint='labels'
 
 X=data[features]
 Y=data[endpoint]
@@ -89,12 +102,16 @@ Y=combined['deltaE']
 X=combined.drop(labels='deltaE',axis=1)
 #X=StandardScaler().fit_transform(X)
 
+from imblearn.under_sampling import RandomUnderSampler 
+random = RandomUnderSampler(random_state=0)
+print(random.get_params)
+X_new,Y_new=random.fit_resample(X,Y)
 
 # make training and test set
-X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.1,random_state=1)
+X_train, X_test, y_train, y_test = train_test_split(X_new, Y_new, test_size=0.1,random_state=1)
 
 # Number of trees in random forest
-n_estimators = [int(x) for x in np.linspace(start = 200, stop = 2000, num = 10)]
+n_estimators = [int(x) for x in np.linspace(start = 200, stop = 2200, num = 11)]
 # Number of features to consider at every split
 max_features = ['auto', 'sqrt']
 # Maximum number of levels in tree
@@ -109,7 +126,7 @@ bootstrap = [True,False]
 # Create the random grid
 tuned_parameters = {'n_estimators': n_estimators,'max_features': max_features,'max_depth': max_depth,
                 'min_samples_split': min_samples_split,'min_samples_leaf': min_samples_leaf,'bootstrap': bootstrap}
-scores = ['neg_mean_absolute_error']
+scores = ['accuracy','precision','recall']
 
 #forest = ExtraTreesClassifier(n_estimators=1000,random_state=1)
 #forest.fit(X,Y)
@@ -137,7 +154,8 @@ scores = ['neg_mean_absolute_error']
 
 
 for score in scores:
-    forest = RandomizedSearchCV(ExtraTreesClassifier(random_state=1),tuned_parameters,verbose=10,cv=3,n_jobs=-1,scoring='%s' %score)
+    print(score) 
+    forest = GridSearchCV(ExtraTreesClassifier(random_state=1),tuned_parameters,verbose=0,cv=3,n_jobs=-1,scoring='%s' %score)
     
     forest.fit(X_train,y_train)
 
@@ -162,19 +180,20 @@ for score in scores:
     classes=['negative','positive']
     size=20
     confusion=confusion_matrix(y_train,model_train)
+    print(confusion)
     plt.figure()
-    #confusion=plot_confusion_matrix(forest,X_test,y_test,display_labels=classes,cmap="coolwarm",normalize='true')
-    fig, ax = plt.subplots(figsize=(size, size))
-    sns.set(font_scale=1.5)
-    sns_plot=sns.heatmap(confusion,cmap="coolwarm",square=True,annot=True, fmt=".1f",annot_kws={"size": 20})
-    plt.yticks(rotation=0,fontsize=16,fontweight='bold')
-    plt.xticks(rotation=90,fontsize=16,fontweight='bold')
-    plt.tight_layout()
-    plt.savefig('confusion_matrix_%s.png' %name)
+    confusion=plot_confusion_matrix(forest,X_test,y_test,display_labels=classes,cmap="coolwarm",normalize='all')
+    #fig, ax = plt.subplots(figsize=(size, size))
+    #sns.set(font_scale=1.5)
+    #sns_plot=sns.heatmap(confusion,cmap="coolwarm",square=True,annot=True, fmt=".1f",annot_kws={"size": 20})
+    #plt.yticks(rotation=0,fontsize=16,fontweight='bold')
+    #plt.xticks(rotation=90,fontsize=16,fontweight='bold')
+    #plt.tight_layout()
+    plt.savefig('confusion_matrix_%s_%s.png' %(name,score))
 
 
     print('writing pickle file...')
-    dump(forest,'%s_class_trees_class.pkl' %name)
+    dump(forest,'%s_class_trees_class_%s.pkl' %(name,score))
     #importances = forest.feature_importances_
     #std = np.std([tree.feature_importances_ for tree in forest.estimators_],
     #             axis=0)
@@ -190,10 +209,10 @@ for score in scores:
     df1=pd.DataFrame()
     df1['train']=y_train
     df1['train_model']=model_train
-    df1.to_csv('forest_model_vs_endpoint_train_'+name+'.csv')
+    df1.to_csv('forest_model_vs_endpoint_train_'+name+'_'+score+'.csv')
     
     
     df2=pd.DataFrame()
     df2['test']=y_test
     df2['test_model']=model_test
-    df2.to_csv('forest_model_vs_endpoint_test_'+name+'.csv')
+    df2.to_csv('forest_model_vs_endpoint_test_'+name+'_'+score+'.csv')
