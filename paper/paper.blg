@@ -1,70 +1,53 @@
 This is BibTeX, Version 0.99d (TeX Live 2018)
 Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
 The top-level auxiliary file: paper.aux
-Illegal, another \bibdata command---line 10 of file paper.aux
- : \bibdata
- :         {paperNotes}
-I'm skipping whatever remains of this command
-The style file: aipnum4-1.bst
-Reallocated singl_function (elt_size=4) to 100 items from 50.
-Reallocated singl_function (elt_size=4) to 100 items from 50.
-Reallocated singl_function (elt_size=4) to 100 items from 50.
-Reallocated singl_function (elt_size=4) to 100 items from 50.
-Reallocated singl_function (elt_size=4) to 100 items from 50.
-Reallocated singl_function (elt_size=4) to 100 items from 50.
-Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
+The style file: rsc.bst
 Database file #1: paperNotes.bib
-control{REVTEX41Control}, control.key{N/A}, control.author{N/A}, control.editor{N/A}, control.title{N/A}, control.pages{N/A}, control.year{N/A}, control.eprint{N/A}, 
-control{aip41Control}, control.key{N/A}, control.author{N/A}, control.editor{N/A}, control.title{0}, control.pages{1}, control.year{N/A}, control.eprint{N/A}, 
-Warning--jnrlst (dependency: not reversed) set 1
+Database file #2: rsc.bib
+Warning--I didn't find a database entry for "Olmstead2009"
+Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
 Reallocated singl_function (elt_size=4) to 100 items from 50.
-merlin.mbs aipnum4-1.bst 2010-07-25 4.21a (PWD, AO, DPC) hacked
-Control: key (0) 
-Control: author (8) initials jnrlst
-Control: editor formatted (1) identically to author
-Control: production of article title (0) allowed
-Control: page (1) range
-Control: year (1) truncated
-Control: production of eprint (0) enabled
-You've used 2 entries,
-            5918 wiz_defined-function locations,
-            1605 strings with 14648 characters,
-and the built_in function-call counts, 849 in all, are:
-= -- 12
-> -- 8
-< -- 27
-+ -- 3
-- -- 16
-* -- 131
-:= -- 54
-add.period$ -- 0
-call.type$ -- 2
+rsc 2016/08/22 v3.1f
+Warning--Need either a note or DOI for Guziewski2019
+You've used 5 entries,
+            3113 wiz_defined-function locations,
+            707 strings with 6340 characters,
+and the built_in function-call counts, 1590 in all, are:
+= -- 122
+> -- 107
+< -- 2
++ -- 33
+- -- 28
+* -- 158
+:= -- 246
+add.period$ -- 5
+call.type$ -- 5
 change.case$ -- 0
-chr.to.int$ -- 4
-cite$ -- 2
-duplicate$ -- 110
-empty$ -- 7
-format.name$ -- 0
-if$ -- 101
+chr.to.int$ -- 5
+cite$ -- 6
+duplicate$ -- 67
+empty$ -- 98
+format.name$ -- 35
+if$ -- 298
 int.to.chr$ -- 1
-int.to.str$ -- 9
-missing$ -- 28
-newline$ -- 52
-num.names$ -- 0
-pop$ -- 73
+int.to.str$ -- 1
+missing$ -- 0
+newline$ -- 51
+num.names$ -- 15
+pop$ -- 16
 preamble$ -- 1
 purify$ -- 0
 quote$ -- 0
-skip$ -- 27
+skip$ -- 38
 stack$ -- 0
-substring$ -- 4
-swap$ -- 98
-text.length$ -- 0
+substring$ -- 69
+swap$ -- 32
+text.length$ -- 10
 text.prefix$ -- 0
-top$ -- 10
-type$ -- 12
+top$ -- 1
+type$ -- 35
 warning$ -- 1
-while$ -- 4
+while$ -- 17
 width$ -- 0
-write$ -- 52
-(There was 1 error message)
+write$ -- 87
+(There were 2 warnings)
