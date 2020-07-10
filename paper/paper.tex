@@ -1,6 +1,6 @@
 %\documentclass[twocolumn]{revtex4-1}
 \documentclass[aip,reprint,longbibliography,amsmath,amssymb,twocolumn,superscriptaddress]{revtex4-1}
-%\documentclass[article]{revtex4-1}
+%\documentclass[review]{elsarticle}
 \usepackage{graphicx} 
 \usepackage{verbatim}
 \usepackage{float}
@@ -12,16 +12,16 @@
 \author{Dennis Trujillo}
 \email{dennis.trujillo@uconn.edu}
 \affiliation{Department of Materials Science \& Engineering and Institute of Materials Science, University of Connecticut, Storrs, CT 06269}
-\author{S. Pamir Alpay}
-\email{pamir.alpay@uconn.edu}
-\affiliation{Department of Materials Science \& Engineering and Institute of Materials Science, University of Connecticut, Storrs, CT 06269}
-\affiliation{Department of Physics, University of Connecticut, Storrs, CT 06269}
 \author{Shawn Coleman}
 \email{shawn.p.coleman8.civ@mail.mil}
 \affiliation{Weapons and Materials Research Directorate, CCDC Army Research Laboratory}
 \author{Matthew Guziewski}
 \email{matthew.c.guziewski.civ@mail.mil}
 \affiliation{Weapons and Materials Research Directorate, CCDC Army Research Laboratory}
+\author{S. Pamir Alpay}
+\email{pamir.alpay@uconn.edu}
+\affiliation{Department of Materials Science \& Engineering and Institute of Materials Science, University of Connecticut, Storrs, CT 06269}
+\affiliation{Department of Physics, University of Connecticut, Storrs, CT 06269}
 
 
 
@@ -56,37 +56,41 @@ However, at the microscale, there are countless microscopic degrees of freedom t
 %
 As a result, the sampling of all combinations of these microscopic degrees of freedom can rapidly increase the computational cost for even a single grain boundary. 
 %
-Previous research has approached the local optimization of interfaces using translational search techniques~\cite{Olmstead2009}, evolutionary/genetic algorithms~\cite{Zhu2018}, and Monte Carlo based sampling~\cite{Banadaki2018}.
+Previous research has approached the local optimization of interfaces using translational search techniques~\cite{Olmsted2009}, evolutionary/genetic algorithms~\cite{Zhu2018}, and Monte Carlo based sampling~\cite{Banadaki2018}.
 %
 While each of these methods proved relatively useful for a specific set of conditions that were investigated, the scope of these studies was often limited to the investigation of single component metals or to the exploration of ideal thermodynamic stable interfaces. 
 %
 Monte Carlo based optimization, however, has recently shown promise in both exploring polycrystalline ceramics and extracting relevant metastable interface structures~\cite{Guziewski2019}. 
 
 %par3
-During Monte Carlo based optimization of bicrystal interfaces [8], structures are probed by pseudo-randomly inserting, removing, or replacing individual atoms within the interface regions. 
-%
-To more efficiently probe likely-favorable states, the randomness of these operations is biased based on probabilities tuned by the user at the start of the search. 
-%
-Once an operation type is chosen, the location of the operation is determined based off probabilities defined by the local structure. 
-%
-After each operation, the interface structure is relaxed using a three-step process of quenching, equilibration, and minimization within the framework of classical molecular dynamics. 
-%
-Energetically favorable operations are accepted using a Boltzmann weighted probability, which enables efficient sampling of metastable interface structures along the way to the energetic minimum. 
-%
-Monte Carlo optimization of a single interface structure will often involve thousands of interface operations and produce hundreds of acceptable metastable states. 
-%
-This amount of data generated in these studies opens up opportunities for machine learning methods for accelerated sampling.  
+%During Monte Carlo based optimization of bicrystal interfaces, structures are probed by pseudo-randomly inserting, removing, or replacing individual atoms within the interface regions. 
+%%
+%To more efficiently probe likely-favorable states, the randomness of these operations is biased based on probabilities tuned by the user at the start of the search. 
+%%
+%Once an operation type is chosen, the location of the operation is determined based off probabilities defined by the local structure. 
+%%
+%After each operation, the interface structure is relaxed using a three-step process of quenching, equilibration, and minimization within the framework of classical molecular dynamics. 
+%%
+%Energetically favorable operations are accepted using a Boltzmann weighted probability, which enables efficient sampling of metastable interface structures along the way to the energetic minimum. 
+%%
+%Monte Carlo optimization of a single interface structure will often involve thousands of interface operations and produce hundreds of acceptable metastable states. 
+%%
+%This amount of data generated in these studies opens up opportunities for machine learning methods for accelerated sampling.  
 
 %par4
 In this study, a machine learning model is constructed to efficiently predict the change in the interface energy after an individual Monte Carlo operation. 
 %
 Here we focus on silicon grain boundary data obtained from classical atomistic simulations coupled with descriptor-based machine learning. 
 %
-We show here this approach can accelerate the overall interface optimization by replacing the hand-tuned operation probabilities with one that takes into account the current system configuration. %(more approachable, better sentence) 
+We show here this approach can accelerate grain boundary optimization  by replacing the standard probability functions which are a function of a single variable to a more complex multivariate machine learned representation. 
 %
 The implementation of a statistical and regression-based scheme for the prediction of the energetic properties of silicon grain boundaries is also discussed. 
 %
-%We show here that … (one or two key outcomes of this paper).  The methodology described herein is applicable to other materials systems such as pure metals and simple one phase substitutional alloys. It can be expanded further to phase boundaries if...
+We show here that accurate models can be developed for the prediction of grain boundary energetics and utilized for speeding up Monte Carlo based selection of low energy grain boundaries.  
+%
+The methodology described in this paper is applicable to other materials systems such as pure metals and simple one phase substitutional alloys. 
+%
+It can be expanded further to phase boundaries with minimal changes to the workflow allowing for accelerated selection of low energy multiphase grain boundaries. This would make it possible to utilize these models to inform phase field and finite element models. 
 
 \section{Materials and Methods}
 \subsection{Monte Carlo Interface Optimization}
@@ -187,6 +191,7 @@ This research was sponsored by the High-Performance Computing Modernization Prog
 %
 The author acknowledges Shawn Coleman and Matt Guziewski for their mentorship.
 
+\section{References}
 \bibliography{rsc} %You need to replace "rsc" on this line with the name of your .bib file
 \bibliographystyle{rsc} 
 

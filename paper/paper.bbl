@@ -1,7 +1,7 @@
 \providecommand*{\mcitethebibliography}{\thebibliography}
 \csname @ifundefined\endcsname{endmcitethebibliography}
 {\let\endmcitethebibliography\endthebibliography}{}
-\begin{mcitethebibliography}{5}
+\begin{mcitethebibliography}{6}
 \providecommand*{\natexlab}[1]{#1}
 \providecommand*{\mciteSetBstSublistMode}[1]{}
 \providecommand*{\mciteSetBstMaxWidthForm}[2]{}
@@ -27,6 +27,13 @@ R.~He and P.~Yang, \emph{Nature Nanotechnology}, 2006, \textbf{1}, 42--46\relax
 \bibitem[Zhang \emph{et~al.}(2013)Zhang, Liu, and Sun]{Zhang2013}
 J.~Y. Zhang, G.~Liu and J.~Sun, \emph{International Journal of Plasticity},
   2013, \textbf{50}, 1--17\relax
+\mciteBstWouldAddEndPuncttrue
+\mciteSetBstMidEndSepPunct{\mcitedefaultmidpunct}
+{\mcitedefaultendpunct}{\mcitedefaultseppunct}\relax
+\EndOfBibitem
+\bibitem[Olmsted \emph{et~al.}(2009)Olmsted, Foiles, and Holm]{Olmsted2009}
+D.~L. Olmsted, S.~M. Foiles and E.~A. Holm, \emph{Acta Materialia}, 2009,
+  \textbf{57}, 3694--3703\relax
 \mciteBstWouldAddEndPuncttrue
 \mciteSetBstMidEndSepPunct{\mcitedefaultmidpunct}
 {\mcitedefaultendpunct}{\mcitedefaultseppunct}\relax
