@@ -94,7 +94,7 @@ It can be expanded further to phase boundaries with minimal changes to the workf
 
 \section{Materials and Methods}
 \subsection{Monte Carlo Interface Optimization}
-
+%par1
 Monte Carlo optimization routines for atomic interfaces were first developed by Banadaki et al. for single-element metals [9] and expanded by Guziewski et al. for multi-element ceramic systems [8].  
 %
 In these works, the initial configuration is perturbed by performing an insertion, removal, or atomic species replacement operation in the interface region. 
@@ -103,17 +103,16 @@ If the operation is energetically favorable, i.e. decreases relative to the orig
 %
 If the energy of the state is less energetically favorable, then the initial state then a Boltzmann weighted probability function is utilized to determine acceptance or rejection of the perturbed state. 
 
-
 To more efficiently explore multi-element interfaces, Guziewski et al. [8] allowed the user to hand-tune the probability of each operation type based off their understanding of the system. 
 %
-For example, in the silicon carbide system used in this study the insertion, removal and replacement operation probabilities were weighted at 50\%, 25\% and 25\% respectively. 
+In order to generate all data utilized in this study, a recently develop Monte Carlo approach to grain boundary optimization was used.  
 %
-Once the operation type is decided, the specific site for the operation to occur was chosen based off additional probability functions that account for the local structure.  
+For a given grain boundary configuration, a single atom is added or removed, with the probability of a particular insertion site a function of the void size, and the probability of removal site a function of the per-atom energy and a structural metric, specifically the common neighbor parameter.  
 %
-Descriptions of the probability functions that Guziewski used to identify the individual operation site are included in Appendix I.  
+After each attempted operation the new grain boundary energy is calculated.  If the grain boundary energy is reduced, the structure is made to be the new grain boundary configuration, while if the energy increases, the structure is accepted or rejected probabilistically as a function of the change in the grain boundary energy.  
 
-
-After each insertion, removal and replacement operation, the atomic structure is relaxed using a three-part process before evaluating its energetic favorability. 
+%par2
+After each insertion, and removal operation, the atomic structure is relaxed using a three-part process before evaluating its energetic favorability. 
 %
 The relaxations included a quench, equilibration, and minimization at 0 K. Quenching involves applying a Nose-Hoover thermostat [10] and Parrinello-Rahman barostat [11] at 0.9 T$_{m}$ and dropping the temperature to a minimum temperature of 5 K over 500 timesteps. 
 %
@@ -133,23 +132,23 @@ If successful, this machine learning model will simplify and speed up a future M
 
 \subsection{Data Utilized}
 
-Data for this work was obtained from individual Monte Carlo optimization steps examining a series of 150 silicon carbide symmetric tilt grain boundaries exhibiting (100) and (110) tilt axes with varying degrees of misorientation.   
+This approach was applied to diverse set of silicon symmetric tilt and twist grain boundaries, with 344 different orientations considered.  For each orientation, 10000 insertion/removal operations were attempted, resulting in a data set of 3.44 M total atomic operations.  
 %
-The data contains specific structural information related to region around each Monte Carlo operation step (insertion, removal, or replace) and the system energies after the three-part relaxation.   
+For each, the local structure was quantified using metrics such as atomic energy, common neighbor parameter, \# of neighbors, and voronoi volume of both the operated upon atom, as well as the nearby neighbors.  
 %
-In total 959,296 unique Monte Carlo operation steps were captured.  
+Thus by relating these local descriptors to the global change in the grain boundary energy, this work hopes to provide a predictive capability to the most favorable vacancy and interstitial locations within any given silicon grain boundary structure. 
 %
-For each operation step, seven atomic metrics are evaluated at the operation site as well as the four closest neighboring atoms to provide 35 structural descriptors to describe the local region.  
+For each operation step, seven atomic metrics are evaluated at the operation site as well as the four closest neighboring atoms to provide 24 structural descriptors to describe the local region.  
 %
 The atomic descriptors used in this study provide both energetic and structural information about the local environment at the operational site and are listed in Table 1.  
 %
-Because it is unlikely that one machine learning model would be applicable for all operations, the dataset was discretized based on both the operation type (insert, remove, or replacement) as well as the atomic species operated upon (Si or C). 
+Because it is unlikely that one machine learning model would be applicable for all operations, the dataset was discretized based on both the operation type (insert, remove). 
 %
 These subsets are then used to train individual models. 
 %
 The subsets are separated into training and test sets with a 0.9/0.1 split that was initially chosen at random.  
 %
-Throughout this study, silicon carbide was modeled using classical atomistic descriptions predicted by LAMMPS [8] using the modified Tersoff potential as developed by Kohler [12].
+%Throughout this study, silicon carbide was modeled using classical atomistic descriptions predicted by LAMMPS [8] using the modified Tersoff potential as developed by Kohler [12].
 
 
 All structural metrics used in this study are fairly inexpensive to compute, so that the models built from these descriptors could potentially reduce the overall computational cost.  
