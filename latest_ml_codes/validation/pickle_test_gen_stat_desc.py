@@ -12,6 +12,12 @@ from sklearn.kernel_ridge import KernelRidge
 from sklearn.model_selection import RandomizedSearchCV, GridSearchCV 
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score 
 
+def mae_acc(y_true,y_pred): 
+    y_true = np.array(y_true)
+    y_pred = np.array(y_pred)
+    return np.abs((y_true - y_pred)).mean() + accuracy_loss(y_true,y_pred) 
+
+
 parser= argparse.ArgumentParser()
 parser.add_argument("data", help="file to be read in", type=str)
 parser.add_argument("model", help="file to be read in", type=str)
@@ -29,6 +35,7 @@ name=args.data
 name=name.split('/')
 name=name[len(name)-1]
 name=name.split('.')[0]
+
 
 if args.insert is True:
     features=['op_voronoi_vol','nn_si_bonds_average','nn_vv_average','nn_dist_average','nn_eng_average','nn_cnp_average',
